@@ -9,7 +9,6 @@ var methodOverride = require('method-override');
 var session = require('express-session');
 
 var routes = require('./routes/index');
-
 var app = express();
 
 // view engine setup
@@ -39,6 +38,22 @@ app.use(function(req, res, next) {
 
   // Hacer visible req.session en las vistas
   res.locals.session = req.session;
+
+  // Control del timeout en sesiones autentificadas
+  if (req.session.time)
+  {
+    var now = new Date();
+    if ((now.getTime()-req.session.time) > 120000)
+    { // Han pasado más de 2 minutos. Cancela la sesión actual.
+      console.log("Session expired");
+      delete req.session.time;
+      delete req.session.user;
+    }
+    else {  // Recarga la estampilla para controlar el tiempo de expiración de la sesión actual.
+      console.log("Session active");
+      req.session.time  = now.getTime();
+    }
+  }
   next();
 });
 

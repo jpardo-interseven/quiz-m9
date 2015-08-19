@@ -26,20 +26,24 @@ exports.create = function(req, res) {
 
         if (error) {  // si hay error retornamos mensajes de error de sesión
             req.session.errors = [{"message": 'Se ha producido un error: '+error}];
-            res.redirect("/login");        
+            res.redirect("/login");
             return;
         }
 
         // Crear req.session.user y guardar campos   id  y  username
         // La sesión se define por la existencia de:    req.session.user
         req.session.user = {id:user.id, username:user.username};
+        var stime = new Date();
+        req.session.time = stime.getTime();  // Guarda la estampilla de tiempo inicial.
+                                             // Se irá actualizando a cada nueva transacción.
 
         res.redirect(req.session.redir.toString());// redirección a path anterior a login
     });
 };
 
-// DELETE /logout   -- Destruir sesion 
+// DELETE /logout   -- Destruir sesion
 exports.destroy = function(req, res) {
     delete req.session.user;
+    delete req.session.time;
     res.redirect(req.session.redir.toString()); // redirect a path anterior a login
 };
